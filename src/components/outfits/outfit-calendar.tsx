@@ -10,12 +10,14 @@ import { Plus, Shirt } from "lucide-react";
 import { OutfitEditor } from "./outfit-editor";
 import { useOutfits } from "@/hooks/use-outfits";
 import { useClothes } from "@/hooks/use-clothes";
+import { useAuthContext } from "@/lib/auth-context";
 import { toast } from "sonner";
 import type { OutfitWithItems } from "@/lib/types";
 
 export function OutfitCalendar() {
   const { outfits, loading: outfitsLoading, saveOutfit, deleteOutfit, refetch: refetchOutfits } = useOutfits();
   const { clothes, loading: clothesLoading, refetch: refetchClothes } = useClothes();
+  const { isOwner } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [editorOpen, setEditorOpen] = useState(false);
 
@@ -85,19 +87,21 @@ export function OutfitCalendar() {
               <h3 className="font-semibold">
                 {format(selectedDate, "EEEE, MMM d")}
               </h3>
-              <Button
-                size="sm"
-                variant={selectedOutfit ? "outline" : "default"}
-                onClick={() => setEditorOpen(true)}
-              >
-                {selectedOutfit ? (
-                  "Edit"
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-1" /> Log Outfit
-                  </>
-                )}
-              </Button>
+              {isOwner && (
+                <Button
+                  size="sm"
+                  variant={selectedOutfit ? "outline" : "default"}
+                  onClick={() => setEditorOpen(true)}
+                >
+                  {selectedOutfit ? (
+                    "Edit"
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-1" /> Log Outfit
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {selectedOutfit ? (

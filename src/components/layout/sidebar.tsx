@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shirt, CalendarDays, BarChart3 } from "lucide-react";
+import { Shirt, CalendarDays, BarChart3, LogIn, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuthContext } from "@/lib/auth-context";
 
 const navItems = [
   { href: "/closet", label: "Closet", icon: Shirt },
@@ -13,6 +15,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user, signOut } = useAuthContext();
 
   return (
     <aside className="hidden md:flex md:w-60 md:flex-col md:border-r bg-card">
@@ -37,6 +40,30 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+      <div className="p-3">
+        {user ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={() => signOut()}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        ) : (
+          <Link href="/login">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-muted-foreground"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </Link>
+        )}
+      </div>
     </aside>
   );
 }

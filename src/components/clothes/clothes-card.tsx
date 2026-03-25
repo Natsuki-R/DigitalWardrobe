@@ -14,8 +14,8 @@ import type { ClothingItemWithCount } from "@/lib/types";
 
 interface ClothesCardProps {
   item: ClothingItemWithCount;
-  onEdit: (item: ClothingItemWithCount) => void;
-  onDelete: (item: ClothingItemWithCount) => void;
+  onEdit?: (item: ClothingItemWithCount) => void;
+  onDelete?: (item: ClothingItemWithCount) => void;
 }
 
 export function ClothesCard({ item, onEdit, onDelete }: ClothesCardProps) {
@@ -35,28 +35,34 @@ export function ClothesCard({ item, onEdit, onDelete }: ClothesCardProps) {
             <Shirt className="h-12 w-12 text-muted-foreground/30" />
           </div>
         )}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={<button className="p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" />}
-            >
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(item)}>
-                <Pencil className="h-3.5 w-3.5 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onDelete(item)}
-                className="text-destructive"
+        {(onEdit || onDelete) && (
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<button className="p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" />}
               >
-                <Trash2 className="h-3.5 w-3.5 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                <MoreHorizontal className="h-3.5 w-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(item)}>
+                    <Pencil className="h-3.5 w-3.5 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                {onDelete && (
+                  <DropdownMenuItem
+                    onClick={() => onDelete(item)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         {item.wear_count > 0 && (
           <Badge className="absolute bottom-2 left-2 text-xs" variant="secondary">
             Worn {item.wear_count}x

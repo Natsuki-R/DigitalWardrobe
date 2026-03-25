@@ -21,12 +21,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClothesCard } from "./clothes-card";
 import { ClothesForm } from "./clothes-form";
 import { useClothes } from "@/hooks/use-clothes";
+import { useAuthContext } from "@/lib/auth-context";
 import { CATEGORIES, type ClothingCategory, type ClothingItemWithCount } from "@/lib/types";
 import { toast } from "sonner";
 
 export function ClothesGrid() {
   const { clothes, loading, addClothing, updateClothing, deleteClothing } =
     useClothes();
+  const { isOwner } = useAuthContext();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -123,10 +125,12 @@ export function ClothesGrid() {
             <SelectItem value="least-worn">Least worn</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Item
-        </Button>
+        {isOwner && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </Button>
+        )}
       </div>
 
       {/* Category Tabs */}
@@ -156,8 +160,8 @@ export function ClothesGrid() {
             <ClothesCard
               key={item.id}
               item={item}
-              onEdit={setEditingItem}
-              onDelete={setDeleteConfirm}
+              onEdit={isOwner ? setEditingItem : undefined}
+              onDelete={isOwner ? setDeleteConfirm : undefined}
             />
           ))}
         </div>
