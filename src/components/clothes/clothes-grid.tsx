@@ -20,6 +20,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClothesCard } from "./clothes-card";
 import { ClothesForm } from "./clothes-form";
+import { ClothesDetail } from "./clothes-detail";
 import { useClothes } from "@/hooks/use-clothes";
 import { useAuthContext } from "@/lib/auth-context";
 import { CATEGORIES, type ClothingCategory, type ClothingItemWithCount } from "@/lib/types";
@@ -33,10 +34,9 @@ export function ClothesGrid() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ClothingItemWithCount | null>(
-    null
-  );
+  const [editingItem, setEditingItem] = useState<ClothingItemWithCount | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ClothingItemWithCount | null>(null);
+  const [previewItem, setPreviewItem] = useState<ClothingItemWithCount | null>(null);
 
   const filtered = clothes
     .filter((item) => {
@@ -94,78 +94,119 @@ export function ClothesGrid() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="aspect-square rounded-lg bg-muted animate-pulse" />
-        ))}
+      <div className="p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="aspect-square rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search clothes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+    <div className="flex flex-col h-full">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="p-6 pb-4 max-w-7xl mx-auto space-y-4">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">My Closet</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              All your clothing items in one place
+            </p>
+          </div>
+
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search clothes..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={sortBy} onValueChange={(v) => v && setSortBy(v)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="most-worn">Most worn</SelectItem>
+                <SelectItem value="least-worn">Least worn</SelectItem>
+              </SelectContent>
+            </Select>
+            {isOwner && (
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
+              </Button>
+            )}
+          </div>
+
+          {/* Category Tabs */}
+          <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
+            <TabsList className="flex-wrap h-auto w-full gap-1">
+              <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+              {CATEGORIES.map((cat) => (
+                <TabsTrigger key={cat.value} value={cat.value} className="text-xs">
+                  {cat.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
-        <Select value={sortBy} onValueChange={(v) => v && setSortBy(v)}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="oldest">Oldest</SelectItem>
-            <SelectItem value="most-worn">Most worn</SelectItem>
-            <SelectItem value="least-worn">Least worn</SelectItem>
-          </SelectContent>
-        </Select>
-        {isOwner && (
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Item
-          </Button>
+      </div>
+
+      {/* Scrollable grid */}
+      <div className="flex-1 p-6 pt-4 max-w-7xl mx-auto w-full">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">
+              {clothes.length === 0
+                ? "Your closet is empty. Add your first item!"
+                : "No items match your filters."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {filtered.map((item) => (
+              <ClothesCard
+                key={item.id}
+                item={item}
+                onClick={setPreviewItem}
+                onEdit={isOwner ? setEditingItem : undefined}
+                onDelete={isOwner ? setDeleteConfirm : undefined}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Category Tabs */}
-      <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
-        <TabsList className="flex-wrap h-auto w-full gap-1">
-          <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-          {CATEGORIES.map((cat) => (
-            <TabsTrigger key={cat.value} value={cat.value} className="text-xs">
-              {cat.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
-      {/* Grid */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-muted-foreground">
-            {clothes.length === 0
-              ? "Your closet is empty. Add your first item!"
-              : "No items match your filters."}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filtered.map((item) => (
-            <ClothesCard
-              key={item.id}
-              item={item}
-              onEdit={isOwner ? setEditingItem : undefined}
-              onDelete={isOwner ? setDeleteConfirm : undefined}
-            />
-          ))}
-        </div>
+      {/* Preview Dialog */}
+      {previewItem && (
+        <ClothesDetail
+          item={previewItem}
+          onClose={() => setPreviewItem(null)}
+          onEdit={
+            isOwner
+              ? () => {
+                  setPreviewItem(null);
+                  setEditingItem(previewItem);
+                }
+              : undefined
+          }
+          onDelete={
+            isOwner
+              ? () => {
+                  setPreviewItem(null);
+                  setDeleteConfirm(previewItem);
+                }
+              : undefined
+          }
+        />
       )}
 
       {/* Add Dialog */}

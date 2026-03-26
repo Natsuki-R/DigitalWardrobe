@@ -18,7 +18,7 @@ export function Sidebar() {
   const { user, signOut } = useAuthContext();
 
   return (
-    <aside className="hidden md:flex md:w-60 md:flex-col md:border-r bg-card">
+    <aside className="hidden md:flex md:w-60 md:flex-col md:border-r bg-card md:sticky md:top-0 md:h-screen">
       <div className="p-6">
         <h1 className="text-xl font-semibold tracking-tight">Wardrobe</h1>
         <p className="text-sm text-muted-foreground mt-1">Your digital closet</p>

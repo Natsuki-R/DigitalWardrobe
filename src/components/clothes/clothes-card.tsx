@@ -14,13 +14,14 @@ import type { ClothingItemWithCount } from "@/lib/types";
 
 interface ClothesCardProps {
   item: ClothingItemWithCount;
+  onClick?: (item: ClothingItemWithCount) => void;
   onEdit?: (item: ClothingItemWithCount) => void;
   onDelete?: (item: ClothingItemWithCount) => void;
 }
 
-export function ClothesCard({ item, onEdit, onDelete }: ClothesCardProps) {
+export function ClothesCard({ item, onClick, onEdit, onDelete }: ClothesCardProps) {
   return (
-    <Card className="group overflow-hidden">
+    <Card className="group overflow-hidden cursor-pointer" onClick={() => onClick?.(item)}>
       <div className="relative aspect-square bg-muted">
         {item.image_url ? (
           <Image
@@ -36,7 +37,7 @@ export function ClothesCard({ item, onEdit, onDelete }: ClothesCardProps) {
           </div>
         )}
         {(onEdit || onDelete) && (
-          <div className="absolute top-2 right-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-2 right-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={<button className="p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors" />}
