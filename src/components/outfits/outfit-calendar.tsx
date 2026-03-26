@@ -61,11 +61,14 @@ export function OutfitCalendar() {
   return (
     <div className="flex gap-6 flex-col lg:flex-row">
       {/* Calendar */}
-      <div>
+      <div className="w-full lg:w-auto flex justify-center lg:justify-start">
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={setSelectedDate}
+          captionLayout="dropdown"
+          startMonth={new Date(2020, 0)}
+          endMonth={new Date(2030, 11)}
           modifiers={{ hasOutfit: outfitDates }}
           modifiersStyles={{
             hasOutfit: {

@@ -47,7 +47,8 @@ export function ClothesGrid() {
         return (
           item.name.toLowerCase().includes(q) ||
           item.brand?.toLowerCase().includes(q) ||
-          item.color?.toLowerCase().includes(q)
+          item.color?.toLowerCase().includes(q) ||
+          item.notes?.toLowerCase().includes(q)
         );
       }
       return true;
@@ -135,7 +136,7 @@ export function ClothesGrid() {
 
       {/* Category Tabs */}
       <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
-        <TabsList className="flex-wrap h-auto gap-1">
+        <TabsList className="flex-wrap h-auto w-full gap-1">
           <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
           {CATEGORIES.map((cat) => (
             <TabsTrigger key={cat.value} value={cat.value} className="text-xs">
