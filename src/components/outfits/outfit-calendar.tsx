@@ -80,7 +80,7 @@ export function OutfitCalendar() {
               textUnderlineOffset: "4px",
             },
           }}
-          className="rounded-lg border w-full lg:w-auto [--cell-size:--spacing(12)] lg:[--cell-size:--spacing(7)] p-3 lg:p-2"
+          className="rounded-lg border w-full lg:w-auto [--cell-size:--spacing(10)] sm:[--cell-size:--spacing(11)] lg:[--cell-size:--spacing(7)] p-2"
         />
       </div>
 

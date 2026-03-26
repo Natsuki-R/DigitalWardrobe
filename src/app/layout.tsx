@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   description: "Your digital closet",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,7 +40,7 @@ export default function RootLayout({
       <body className="min-h-full flex">
         <AuthProvider>
           <Sidebar />
-          <main className="flex-1 min-h-screen pb-20 md:pb-0">
+          <main className="flex-1 min-h-screen pb-20 md:pb-0 overflow-x-hidden">
             {children}
           </main>
           <MobileNav />
