@@ -40,7 +40,7 @@ export default function RootLayout({
       <body className="min-h-full flex">
         <AuthProvider>
           <Sidebar />
-          <main className="flex-1 min-h-screen pb-20 md:pb-0 overflow-x-hidden">
+          <main className="flex-1 min-h-screen pb-20 md:pb-0">
             {children}
           </main>
           <MobileNav />

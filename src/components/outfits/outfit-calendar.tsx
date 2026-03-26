@@ -63,7 +63,7 @@ export function OutfitCalendar() {
   return (
     <div className="flex gap-6 flex-col lg:flex-row">
       {/* Calendar */}
-      <div className="w-full lg:w-auto">
+      <div className="flex justify-center lg:justify-start">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -80,7 +80,7 @@ export function OutfitCalendar() {
               textUnderlineOffset: "4px",
             },
           }}
-          className="rounded-lg border w-full lg:w-auto [--cell-size:--spacing(10)] sm:[--cell-size:--spacing(11)] lg:[--cell-size:--spacing(7)] p-2"
+          className="rounded-lg border"
         />
       </div>
 
