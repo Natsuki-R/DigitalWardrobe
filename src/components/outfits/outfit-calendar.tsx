@@ -1,25 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { format, isSameDay } from "date-fns";
+import { useState } from "react";
+import { format } from "date-fns";
 import Image from "next/image";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Shirt } from "lucide-react";
 import { OutfitEditor } from "./outfit-editor";
+import { ClothesDetail } from "@/components/clothes/clothes-detail";
 import { useOutfits } from "@/hooks/use-outfits";
 import { useClothes } from "@/hooks/use-clothes";
 import { useAuthContext } from "@/lib/auth-context";
 import { toast } from "sonner";
-import type { OutfitWithItems } from "@/lib/types";
+import type { ClothingItem, OutfitWithItems } from "@/lib/types";
 
 export function OutfitCalendar() {
-  const { outfits, loading: outfitsLoading, saveOutfit, deleteOutfit, refetch: refetchOutfits } = useOutfits();
+  const { outfits, loading: outfitsLoading, saveOutfit, deleteOutfit } = useOutfits();
   const { clothes, loading: clothesLoading, refetch: refetchClothes } = useClothes();
   const { isOwner } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [editorOpen, setEditorOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<ClothingItem | null>(null);
 
   const loading = outfitsLoading || clothesLoading;
 
@@ -78,10 +80,7 @@ export function OutfitCalendar() {
               textUnderlineOffset: "4px",
             },
           }}
-          className="rounded-lg border w-full lg:w-auto [&_[data-slot=calendar]]:w-full [&_[data-slot=calendar]]:lg:w-fit [&_.rdp-month]:w-full [&_.rdp-months]:w-full [&_.rdp-week]:w-full [&_.rdp-weekdays]:w-full"
-          classNames={{
-            day: "flex-1",
-          }}
+          className="rounded-lg border w-full lg:w-auto [--cell-size:--spacing(12)] lg:[--cell-size:--spacing(7)] p-3 lg:p-2"
         />
       </div>
 
@@ -114,7 +113,11 @@ export function OutfitCalendar() {
               <div className="space-y-3">
                 <div className="flex gap-3 flex-wrap">
                   {selectedOutfit.items.map((item) => (
-                    <div key={item.id} className="text-center">
+                    <button
+                      key={item.id}
+                      className="text-center cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => setPreviewItem(item)}
+                    >
                       <div className="relative h-20 w-20 rounded-lg overflow-hidden border">
                         {item.image_url ? (
                           <Image
@@ -130,10 +133,10 @@ export function OutfitCalendar() {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs mt-1 truncate max-w-[80px]">
+                      <p className="text-xs mt-1 truncate max-w-20">
                         {item.name}
                       </p>
-                    </div>
+                    </button>
                   ))}
                 </div>
                 {selectedOutfit.notes && (
@@ -154,6 +157,17 @@ export function OutfitCalendar() {
           </p>
         )}
       </Card>
+
+      {/* Item preview dialog */}
+      {previewItem && (
+        <ClothesDetail
+          item={{
+            ...previewItem,
+            wear_count: clothes.find((c) => c.id === previewItem.id)?.wear_count ?? 0,
+          }}
+          onClose={() => setPreviewItem(null)}
+        />
+      )}
 
       {/* Editor dialog */}
       {editorOpen && selectedDate && (
