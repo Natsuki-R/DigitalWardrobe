@@ -39,6 +39,7 @@ export interface Outfit {
   id: string;
   date: string;
   notes: string | null;
+  starred: boolean;
   created_at: string;
 }
 

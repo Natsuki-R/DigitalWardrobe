@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,14 @@ export function ClothesGrid() {
   const [editingItem, setEditingItem] = useState<ClothingItemWithCount | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ClothingItemWithCount | null>(null);
   const [previewItem, setPreviewItem] = useState<ClothingItemWithCount | null>(null);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: clothes.length };
+    for (const item of clothes) {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+    }
+    return counts;
+  }, [clothes]);
 
   const filtered = clothes
     .filter((item) => {
@@ -149,10 +157,10 @@ export function ClothesGrid() {
           {/* Category Tabs */}
           <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
             <TabsList className="flex-wrap h-auto w-full gap-1">
-              <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs">All ({categoryCounts.all})</TabsTrigger>
               {CATEGORIES.map((cat) => (
                 <TabsTrigger key={cat.value} value={cat.value} className="text-xs">
-                  {cat.label}
+                  {cat.label} ({categoryCounts[cat.value] || 0})
                 </TabsTrigger>
               ))}
             </TabsList>

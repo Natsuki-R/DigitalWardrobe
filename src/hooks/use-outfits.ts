@@ -97,6 +97,16 @@ export function useOutfits() {
     await fetchOutfits();
   };
 
+  const toggleStar = async (outfitId: string) => {
+    const outfit = outfits.find((o) => o.id === outfitId);
+    if (!outfit) return;
+    await supabase
+      .from("outfits")
+      .update({ starred: !outfit.starred })
+      .eq("id", outfitId);
+    await fetchOutfits();
+  };
+
   const deleteOutfit = async (outfitId: string) => {
     await supabase.from("outfits").delete().eq("id", outfitId);
     await fetchOutfits();
@@ -106,5 +116,5 @@ export function useOutfits() {
     return outfits.find((o) => o.date === date);
   };
 
-  return { outfits, loading, saveOutfit, deleteOutfit, getOutfitByDate, refetch: fetchOutfits };
+  return { outfits, loading, saveOutfit, deleteOutfit, toggleStar, getOutfitByDate, refetch: fetchOutfits };
 }

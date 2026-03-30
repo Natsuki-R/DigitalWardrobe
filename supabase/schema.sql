@@ -16,6 +16,7 @@ CREATE TABLE outfits (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   date DATE NOT NULL UNIQUE,
   notes TEXT,
+  starred BOOLEAN DEFAULT FALSE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
 
