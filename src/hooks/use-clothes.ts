@@ -104,6 +104,24 @@ export function useClothes() {
     await fetchClothes();
   };
 
+  const archiveClothing = async (id: string) => {
+    const { error } = await supabase
+      .from("clothes")
+      .update({ archived: true })
+      .eq("id", id);
+    if (error) throw error;
+    await fetchClothes();
+  };
+
+  const unarchiveClothing = async (id: string) => {
+    const { error } = await supabase
+      .from("clothes")
+      .update({ archived: false })
+      .eq("id", id);
+    if (error) throw error;
+    await fetchClothes();
+  };
+
   const deleteClothing = async (item: ClothingItem) => {
     if (item.image_url) {
       await deleteClothesImage(item.image_url);
@@ -114,5 +132,5 @@ export function useClothes() {
     await fetchClothes();
   };
 
-  return { clothes, loading, addClothing, updateClothing, deleteClothing, refetch: fetchClothes };
+  return { clothes, loading, addClothing, updateClothing, archiveClothing, unarchiveClothing, deleteClothing, refetch: fetchClothes };
 }

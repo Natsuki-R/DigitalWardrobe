@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, Shirt } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Shirt, Archive, ArchiveRestore } from "lucide-react";
 import type { ClothingItemWithCount } from "@/lib/types";
 
 interface ClothesCardProps {
@@ -17,11 +17,14 @@ interface ClothesCardProps {
   onClick?: (item: ClothingItemWithCount) => void;
   onEdit?: (item: ClothingItemWithCount) => void;
   onDelete?: (item: ClothingItemWithCount) => void;
+  onArchive?: (item: ClothingItemWithCount) => void;
+  onUnarchive?: (item: ClothingItemWithCount) => void;
 }
 
-export function ClothesCard({ item, onClick, onEdit, onDelete }: ClothesCardProps) {
+export function ClothesCard({ item, onClick, onEdit, onDelete, onArchive, onUnarchive }: ClothesCardProps) {
+  const hasMenu = onEdit || onDelete || onArchive || onUnarchive;
   return (
-    <Card className="group overflow-hidden cursor-pointer" onClick={() => onClick?.(item)}>
+    <Card className={`group overflow-hidden cursor-pointer ${item.archived ? "opacity-60" : ""}`} onClick={() => onClick?.(item)}>
       <div className="relative aspect-square bg-muted">
         {item.image_url ? (
           <Image
@@ -36,7 +39,7 @@ export function ClothesCard({ item, onClick, onEdit, onDelete }: ClothesCardProp
             <Shirt className="h-12 w-12 text-muted-foreground/30" />
           </div>
         )}
-        {(onEdit || onDelete) && (
+        {hasMenu && (
           <div className="absolute top-2 right-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -51,18 +54,35 @@ export function ClothesCard({ item, onClick, onEdit, onDelete }: ClothesCardProp
                     Edit
                   </DropdownMenuItem>
                 )}
+                {onArchive && (
+                  <DropdownMenuItem onClick={() => onArchive(item)}>
+                    <Archive className="h-3.5 w-3.5 mr-2" />
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                {onUnarchive && (
+                  <DropdownMenuItem onClick={() => onUnarchive(item)}>
+                    <ArchiveRestore className="h-3.5 w-3.5 mr-2" />
+                    Unarchive
+                  </DropdownMenuItem>
+                )}
                 {onDelete && (
                   <DropdownMenuItem
                     onClick={() => onDelete(item)}
                     className="text-destructive"
                   >
                     <Trash2 className="h-3.5 w-3.5 mr-2" />
-                    Delete
+                    Delete permanently
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+        )}
+        {item.archived && (
+          <Badge className="absolute top-2 left-2 text-xs" variant="secondary">
+            Archived
+          </Badge>
         )}
         {item.wear_count > 0 && (
           <Badge className="absolute bottom-2 left-2 text-xs" variant="secondary">

@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Shirt, Pencil, Trash2 } from "lucide-react";
+import { Shirt, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react";
 import type { ClothingItemWithCount } from "@/lib/types";
 
 interface ClothesDetailProps {
@@ -19,9 +19,11 @@ interface ClothesDetailProps {
   onClose: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onArchive?: () => void;
+  onUnarchive?: () => void;
 }
 
-export function ClothesDetail({ item, onClose, onEdit, onDelete }: ClothesDetailProps) {
+export function ClothesDetail({ item, onClose, onEdit, onDelete, onArchive, onUnarchive }: ClothesDetailProps) {
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -50,6 +52,7 @@ export function ClothesDetail({ item, onClose, onEdit, onDelete }: ClothesDetail
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="capitalize">{item.category}</Badge>
+            {item.archived && <Badge variant="outline">Archived</Badge>}
             {item.color && <Badge variant="outline">{item.color}</Badge>}
             <Badge variant={item.wear_count > 0 ? "default" : "outline"}>
               Worn {item.wear_count}x
@@ -76,7 +79,7 @@ export function ClothesDetail({ item, onClose, onEdit, onDelete }: ClothesDetail
         </div>
 
         {/* Actions */}
-        {(onEdit || onDelete) && (
+        {(onEdit || onDelete || onArchive || onUnarchive) && (
           <div className="flex gap-2 pt-2">
             {onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit} className="flex-1">
@@ -84,10 +87,22 @@ export function ClothesDetail({ item, onClose, onEdit, onDelete }: ClothesDetail
                 Edit
               </Button>
             )}
+            {onArchive && (
+              <Button variant="outline" size="sm" onClick={onArchive} className="flex-1">
+                <Archive className="h-3.5 w-3.5 mr-2" />
+                Archive
+              </Button>
+            )}
+            {onUnarchive && (
+              <Button variant="outline" size="sm" onClick={onUnarchive} className="flex-1">
+                <ArchiveRestore className="h-3.5 w-3.5 mr-2" />
+                Unarchive
+              </Button>
+            )}
             {onDelete && (
               <Button variant="destructive" size="sm" onClick={onDelete} className="flex-1">
                 <Trash2 className="h-3.5 w-3.5 mr-2" />
-                Delete
+                Delete permanently
               </Button>
             )}
           </div>

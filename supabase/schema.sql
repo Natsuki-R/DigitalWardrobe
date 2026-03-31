@@ -7,6 +7,7 @@ CREATE TABLE clothes (
   color TEXT,
   image_url TEXT,
   notes TEXT,
+  archived BOOLEAN DEFAULT FALSE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );

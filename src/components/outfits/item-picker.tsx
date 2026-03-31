@@ -18,6 +18,7 @@ export function ItemPicker({ clothes, selected, onToggle }: ItemPickerProps) {
   const [search, setSearch] = useState("");
 
   const filtered = clothes.filter((item) => {
+    if (item.archived) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (

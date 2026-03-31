@@ -27,7 +27,7 @@ import { CATEGORIES, type ClothingCategory, type ClothingItemWithCount } from "@
 import { toast } from "sonner";
 
 export function ClothesGrid() {
-  const { clothes, loading, addClothing, updateClothing, deleteClothing } =
+  const { clothes, loading, addClothing, updateClothing, archiveClothing, unarchiveClothing, deleteClothing } =
     useClothes();
   const { isOwner } = useAuthContext();
   const [search, setSearch] = useState("");
@@ -38,17 +38,22 @@ export function ClothesGrid() {
   const [deleteConfirm, setDeleteConfirm] = useState<ClothingItemWithCount | null>(null);
   const [previewItem, setPreviewItem] = useState<ClothingItemWithCount | null>(null);
 
+  const viewingArchived = categoryFilter === "archived";
+
+  const activeClothes = useMemo(() => clothes.filter((item) => !item.archived), [clothes]);
+  const archivedClothes = useMemo(() => clothes.filter((item) => item.archived), [clothes]);
+
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: clothes.length };
-    for (const item of clothes) {
+    const counts: Record<string, number> = { all: activeClothes.length, archived: archivedClothes.length };
+    for (const item of activeClothes) {
       counts[item.category] = (counts[item.category] || 0) + 1;
     }
     return counts;
-  }, [clothes]);
+  }, [activeClothes, archivedClothes]);
 
-  const filtered = clothes
+  const filtered = (viewingArchived ? archivedClothes : activeClothes)
     .filter((item) => {
-      if (categoryFilter !== "all" && item.category !== categoryFilter)
+      if (!viewingArchived && categoryFilter !== "all" && item.category !== categoryFilter)
         return false;
       if (search) {
         const q = search.toLowerCase();
@@ -93,11 +98,21 @@ export function ClothesGrid() {
     toast.success("Item updated");
   };
 
+  const handleArchive = async (item: ClothingItemWithCount) => {
+    await archiveClothing(item.id);
+    toast.success("Item archived");
+  };
+
+  const handleUnarchive = async (item: ClothingItemWithCount) => {
+    await unarchiveClothing(item.id);
+    toast.success("Item restored to your closet");
+  };
+
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     await deleteClothing(deleteConfirm);
     setDeleteConfirm(null);
-    toast.success("Item removed from your closet");
+    toast.success("Item permanently deleted");
   };
 
   if (loading) {
@@ -163,6 +178,11 @@ export function ClothesGrid() {
                   {cat.label} ({categoryCounts[cat.value] || 0})
                 </TabsTrigger>
               ))}
+              {categoryCounts.archived > 0 && (
+                <TabsTrigger value="archived" className="text-xs">
+                  Archived ({categoryCounts.archived})
+                </TabsTrigger>
+              )}
             </TabsList>
           </Tabs>
         </div>
@@ -185,8 +205,10 @@ export function ClothesGrid() {
                 key={item.id}
                 item={item}
                 onClick={setPreviewItem}
-                onEdit={isOwner ? setEditingItem : undefined}
-                onDelete={isOwner ? setDeleteConfirm : undefined}
+                onEdit={isOwner && !item.archived ? setEditingItem : undefined}
+                onArchive={isOwner && !item.archived ? handleArchive : undefined}
+                onUnarchive={isOwner && item.archived ? handleUnarchive : undefined}
+                onDelete={isOwner && item.archived ? setDeleteConfirm : undefined}
               />
             ))}
           </div>
@@ -199,15 +221,31 @@ export function ClothesGrid() {
           item={previewItem}
           onClose={() => setPreviewItem(null)}
           onEdit={
-            isOwner
+            isOwner && !previewItem.archived
               ? () => {
                   setPreviewItem(null);
                   setEditingItem(previewItem);
                 }
               : undefined
           }
+          onArchive={
+            isOwner && !previewItem.archived
+              ? () => {
+                  handleArchive(previewItem);
+                  setPreviewItem(null);
+                }
+              : undefined
+          }
+          onUnarchive={
+            isOwner && previewItem.archived
+              ? () => {
+                  handleUnarchive(previewItem);
+                  setPreviewItem(null);
+                }
+              : undefined
+          }
           onDelete={
-            isOwner
+            isOwner && previewItem.archived
               ? () => {
                   setPreviewItem(null);
                   setDeleteConfirm(previewItem);

@@ -27,6 +27,7 @@ export interface ClothingItem {
   color: string | null;
   image_url: string | null;
   notes: string | null;
+  archived: boolean;
   created_at: string;
   updated_at: string;
 }
