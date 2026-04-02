@@ -87,7 +87,7 @@ export function OutfitEditor({
                       alt={item.name}
                       fill
                       className="object-cover"
-                      unoptimized
+                      sizes="64px"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full bg-muted">

@@ -45,8 +45,9 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
             src={preview}
             alt="Preview"
             fill
+            sizes="200px"
             className="object-cover"
-            unoptimized
+            unoptimized={preview.startsWith("data:")}
           />
           <button
             type="button"

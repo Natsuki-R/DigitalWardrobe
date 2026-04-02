@@ -143,7 +143,7 @@ export function OutfitCalendar() {
                             alt={item.name}
                             fill
                             className="object-cover"
-                            unoptimized
+                            sizes="80px"
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full bg-muted">
@@ -204,7 +204,7 @@ export function OutfitCalendar() {
                           alt={item.name}
                           fill
                           className="object-cover"
-                          unoptimized
+                          sizes="40px"
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full bg-muted">

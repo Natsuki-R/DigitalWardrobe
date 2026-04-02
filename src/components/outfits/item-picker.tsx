@@ -60,8 +60,8 @@ export function ItemPicker({ clothes, selected, onToggle }: ItemPickerProps) {
                     src={item.image_url}
                     alt={item.name}
                     fill
+                    sizes="(max-width: 640px) 30vw, 100px"
                     className="object-cover"
-                    unoptimized
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full bg-muted">

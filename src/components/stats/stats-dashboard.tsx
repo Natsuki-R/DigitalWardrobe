@@ -108,8 +108,8 @@ export function StatsDashboard() {
                           src={item.image_url}
                           alt={item.name}
                           fill
+                          sizes="40px"
                           className="object-cover"
-                          unoptimized
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full bg-muted">
@@ -190,8 +190,8 @@ export function StatsDashboard() {
                         src={item.image_url}
                         alt={item.name}
                         fill
+                        sizes="64px"
                         className="object-cover"
-                        unoptimized
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full bg-muted">

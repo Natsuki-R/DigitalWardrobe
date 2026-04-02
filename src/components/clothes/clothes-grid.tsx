@@ -37,6 +37,7 @@ export function ClothesGrid() {
   const [editingItem, setEditingItem] = useState<ClothingItemWithCount | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ClothingItemWithCount | null>(null);
   const [previewItem, setPreviewItem] = useState<ClothingItemWithCount | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const viewingArchived = categoryFilter === "archived";
 
@@ -99,20 +100,41 @@ export function ClothesGrid() {
   };
 
   const handleArchive = async (item: ClothingItemWithCount) => {
-    await archiveClothing(item.id);
-    toast.success("Item archived");
+    setSaving(true);
+    try {
+      await archiveClothing(item.id);
+      toast.success("Item archived");
+    } catch {
+      toast.error("Failed to archive item");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleUnarchive = async (item: ClothingItemWithCount) => {
-    await unarchiveClothing(item.id);
-    toast.success("Item restored to your closet");
+    setSaving(true);
+    try {
+      await unarchiveClothing(item.id);
+      toast.success("Item restored to your closet");
+    } catch {
+      toast.error("Failed to restore item");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
-    await deleteClothing(deleteConfirm);
-    setDeleteConfirm(null);
-    toast.success("Item permanently deleted");
+    setSaving(true);
+    try {
+      await deleteClothing(deleteConfirm);
+      setDeleteConfirm(null);
+      toast.success("Item permanently deleted");
+    } catch {
+      toast.error("Failed to delete item");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -291,11 +313,11 @@ export function ClothesGrid() {
             This will permanently remove this item and its photo. This action cannot be undone.
           </p>
           <div className="flex gap-2 justify-end mt-4">
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)} disabled={saving}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
+            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
+              {saving ? "Deleting..." : "Delete"}
             </Button>
           </div>
         </DialogContent>

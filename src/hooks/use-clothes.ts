@@ -65,13 +65,16 @@ export function useClothes() {
       image_url = await uploadClothesImage(imageFile);
     }
 
-    const { error } = await supabase.from("clothes").insert({
-      ...data,
-      image_url,
-    });
+    const { data: inserted, error } = await supabase
+      .from("clothes")
+      .insert({ ...data, image_url })
+      .select()
+      .single();
 
     if (error) throw error;
-    await fetchClothes();
+
+    // Optimistic: append to local state
+    setClothes((prev) => [{ ...inserted, wear_count: 0 }, ...prev]);
   };
 
   const updateClothing = async (
@@ -95,41 +98,87 @@ export function useClothes() {
       image_url = await uploadClothesImage(imageFile);
     }
 
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("clothes")
       .update({ ...data, image_url })
-      .eq("id", id);
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) throw error;
-    await fetchClothes();
+
+    // Optimistic: update in local state
+    setClothes((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...updated, wear_count: item.wear_count } : item
+      )
+    );
   };
 
   const archiveClothing = async (id: string) => {
+    // Optimistic: update locally first
+    setClothes((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, archived: true } : item
+      )
+    );
+
     const { error } = await supabase
       .from("clothes")
       .update({ archived: true })
       .eq("id", id);
-    if (error) throw error;
-    await fetchClothes();
+
+    if (error) {
+      // Rollback on failure
+      setClothes((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, archived: false } : item
+        )
+      );
+      throw error;
+    }
   };
 
   const unarchiveClothing = async (id: string) => {
+    // Optimistic: update locally first
+    setClothes((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, archived: false } : item
+      )
+    );
+
     const { error } = await supabase
       .from("clothes")
       .update({ archived: false })
       .eq("id", id);
-    if (error) throw error;
-    await fetchClothes();
+
+    if (error) {
+      // Rollback on failure
+      setClothes((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, archived: true } : item
+        )
+      );
+      throw error;
+    }
   };
 
   const deleteClothing = async (item: ClothingItem) => {
+    // Optimistic: remove from local state
+    setClothes((prev) => prev.filter((c) => c.id !== item.id));
+
+    const { error } = await supabase.from("clothes").delete().eq("id", item.id);
+
+    if (error) {
+      // Rollback: re-fetch to restore correct state
+      await fetchClothes();
+      throw error;
+    }
+
+    // Delete image after DB success to avoid orphans
     if (item.image_url) {
       await deleteClothesImage(item.image_url);
     }
-
-    const { error } = await supabase.from("clothes").delete().eq("id", item.id);
-    if (error) throw error;
-    await fetchClothes();
   };
 
   return { clothes, loading, addClothing, updateClothing, archiveClothing, unarchiveClothing, deleteClothing, refetch: fetchClothes };

@@ -31,8 +31,8 @@ export function ClothesCard({ item, onClick, onEdit, onDelete, onArchive, onUnar
             src={item.image_url}
             alt={item.name}
             fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
             className="object-cover"
-            unoptimized
           />
         ) : (
           <div className="flex items-center justify-center h-full">

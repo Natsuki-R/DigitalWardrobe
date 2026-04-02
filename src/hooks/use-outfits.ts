@@ -94,22 +94,50 @@ export function useOutfits() {
       if (error) throw error;
     }
 
+    // Save involves multiple tables — full refetch is safest here
     await fetchOutfits();
   };
 
   const toggleStar = async (outfitId: string) => {
     const outfit = outfits.find((o) => o.id === outfitId);
     if (!outfit) return;
-    await supabase
+
+    const newStarred = !outfit.starred;
+
+    // Optimistic update
+    setOutfits((prev) =>
+      prev.map((o) =>
+        o.id === outfitId ? { ...o, starred: newStarred } : o
+      )
+    );
+
+    const { error } = await supabase
       .from("outfits")
-      .update({ starred: !outfit.starred })
+      .update({ starred: newStarred })
       .eq("id", outfitId);
-    await fetchOutfits();
+
+    if (error) {
+      // Rollback
+      setOutfits((prev) =>
+        prev.map((o) =>
+          o.id === outfitId ? { ...o, starred: !newStarred } : o
+        )
+      );
+      throw error;
+    }
   };
 
   const deleteOutfit = async (outfitId: string) => {
-    await supabase.from("outfits").delete().eq("id", outfitId);
-    await fetchOutfits();
+    // Optimistic: remove from local state
+    const prev = outfits;
+    setOutfits((current) => current.filter((o) => o.id !== outfitId));
+
+    const { error } = await supabase.from("outfits").delete().eq("id", outfitId);
+
+    if (error) {
+      setOutfits(prev);
+      throw error;
+    }
   };
 
   const getOutfitByDate = (date: string) => {
