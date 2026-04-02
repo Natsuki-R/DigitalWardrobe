@@ -5,8 +5,9 @@ import Image from "next/image";
 import { Search, Shirt, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import type { ClothingItem } from "@/lib/types";
+import { CATEGORIES, type ClothingItem } from "@/lib/types";
 
 interface ItemPickerProps {
   clothes: ClothingItem[];
@@ -16,9 +17,13 @@ interface ItemPickerProps {
 
 export function ItemPicker({ clothes, selected, onToggle }: ItemPickerProps) {
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-  const filtered = clothes.filter((item) => {
-    if (item.archived) return false;
+  const activeClothes = clothes.filter((item) => !item.archived);
+
+  const filtered = activeClothes.filter((item) => {
+    if (categoryFilter !== "all" && item.category !== categoryFilter)
+      return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -39,7 +44,21 @@ export function ItemPicker({ clothes, selected, onToggle }: ItemPickerProps) {
           className="pl-9"
         />
       </div>
-      <ScrollArea className="h-[300px]">
+      <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
+        <TabsList className="flex-wrap h-auto w-full gap-0.5">
+          <TabsTrigger value="all" className="text-[11px] px-2 py-1">All</TabsTrigger>
+          {CATEGORIES.map((cat) => {
+            const count = activeClothes.filter((c) => c.category === cat.value).length;
+            if (count === 0) return null;
+            return (
+              <TabsTrigger key={cat.value} value={cat.value} className="text-[11px] px-2 py-1">
+                {cat.label}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
+      <ScrollArea className="h-[350px]">
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {filtered.map((item) => {
             const isSelected = selected.includes(item.id);
@@ -83,6 +102,11 @@ export function ItemPicker({ clothes, selected, onToggle }: ItemPickerProps) {
               </button>
             );
           })}
+          {filtered.length === 0 && (
+            <p className="col-span-full text-center text-sm text-muted-foreground py-8">
+              No items found.
+            </p>
+          )}
         </div>
       </ScrollArea>
       <p className="text-xs text-muted-foreground text-center">

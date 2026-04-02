@@ -1,12 +1,32 @@
 import { supabase } from "./supabase";
 
+const MAX_SIZE_BYTES = 100 * 1024; // 100KB
+
+async function compressImage(file: File): Promise<Blob> {
+  if (!file.type.startsWith("image/")) return file;
+  if (file.size <= MAX_SIZE_BYTES) return file;
+
+  const img = await createImageBitmap(file);
+  const canvas = new OffscreenCanvas(img.width, img.height);
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0);
+
+  // Decrease quality until under target size
+  for (let quality = 0.8; quality >= 0.1; quality -= 0.1) {
+    const blob = await canvas.convertToBlob({ type: "image/webp", quality });
+    if (blob.size <= MAX_SIZE_BYTES) return blob;
+  }
+
+  return canvas.convertToBlob({ type: "image/webp", quality: 0.1 });
+}
+
 export async function uploadClothesImage(file: File): Promise<string> {
-  const ext = file.name.split(".").pop();
-  const fileName = `${crypto.randomUUID()}.${ext}`;
+  const compressed = await compressImage(file);
+  const fileName = `${crypto.randomUUID()}.webp`;
 
   const { error } = await supabase.storage
     .from("clothes-images")
-    .upload(fileName, file);
+    .upload(fileName, compressed, { contentType: "image/webp" });
 
   if (error) throw error;
 
