@@ -1,15 +1,25 @@
 import { supabase } from "./supabase";
 
 const MAX_SIZE_BYTES = 100 * 1024; // 100KB
+const MAX_DIMENSION = 800; // Max width or height — preserves aspect ratio
 
-async function compressImage(file: File): Promise<Blob> {
+export async function compressImage(file: File): Promise<Blob> {
   if (!file.type.startsWith("image/")) return file;
   if (file.size <= MAX_SIZE_BYTES) return file;
 
   const img = await createImageBitmap(file);
-  const canvas = new OffscreenCanvas(img.width, img.height);
+  let { width, height } = img;
+
+  // Scale down proportionally if either side exceeds max
+  if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+    const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+    width = Math.round(width * ratio);
+    height = Math.round(height * ratio);
+  }
+
+  const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(img, 0, 0, width, height);
 
   // Decrease quality until under target size
   for (let quality = 0.8; quality >= 0.1; quality -= 0.1) {
