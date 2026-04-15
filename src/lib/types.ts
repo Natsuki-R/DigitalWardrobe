@@ -53,3 +53,31 @@ export interface OutfitItem {
 export interface OutfitWithItems extends Outfit {
   items: ClothingItem[];
 }
+
+// Collections (albums, CDs, devices, books, etc.)
+export type CollectionCategory =
+  | "albums"
+  | "cds"
+  | "devices"
+  | "books"
+  | "other";
+
+export const COLLECTION_CATEGORIES: { value: CollectionCategory; label: string }[] = [
+  { value: "albums", label: "Albums" },
+  { value: "cds", label: "CDs" },
+  { value: "devices", label: "Devices" },
+  { value: "books", label: "Books" },
+  { value: "other", label: "Other" },
+];
+
+export interface CollectionItem {
+  id: string;
+  name: string;
+  category: CollectionCategory;
+  brand: string | null;
+  image_url: string | null;
+  notes: string | null;
+  archived: boolean;
+  created_at: string;
+  updated_at: string;
+}

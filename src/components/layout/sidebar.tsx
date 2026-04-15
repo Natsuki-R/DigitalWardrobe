@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shirt, CalendarDays, BarChart3, LogIn, LogOut } from "lucide-react";
+import { Shirt, CalendarDays, BarChart3, Library, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/lib/auth-context";
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/closet", label: "Closet", icon: Shirt },
   { href: "/outfits", label: "Outfits", icon: CalendarDays },
   { href: "/stats", label: "Stats", icon: BarChart3 },
+  { href: "/collections", label: "Collections", icon: Library },
 ];
 
 export function Sidebar() {

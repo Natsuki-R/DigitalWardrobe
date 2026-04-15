@@ -54,3 +54,28 @@ export async function deleteClothesImage(url: string): Promise<void> {
 
   await supabase.storage.from("clothes-images").remove([fileName]);
 }
+
+export async function uploadCollectionImage(file: File): Promise<string> {
+  const compressed = await compressImage(file);
+  const fileName = `${crypto.randomUUID()}.webp`;
+
+  const { error } = await supabase.storage
+    .from("collection-images")
+    .upload(fileName, compressed, { contentType: "image/webp" });
+
+  if (error) throw error;
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("collection-images").getPublicUrl(fileName);
+
+  return publicUrl;
+}
+
+export async function deleteCollectionImage(url: string): Promise<void> {
+  const parts = url.split("/");
+  const fileName = parts[parts.length - 1];
+  if (!fileName) return;
+
+  await supabase.storage.from("collection-images").remove([fileName]);
+}
