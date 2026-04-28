@@ -28,7 +28,7 @@ export function CollectionDetail({ item, onClose, onEdit, onDelete, onArchive, o
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{item.name}</DialogTitle>
         </DialogHeader>

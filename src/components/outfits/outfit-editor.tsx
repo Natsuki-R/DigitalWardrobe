@@ -67,7 +67,7 @@ export function OutfitEditor({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{format(date, "EEEE, MMMM d, yyyy")}</DialogTitle>
         </DialogHeader>
