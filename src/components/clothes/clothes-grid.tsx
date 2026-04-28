@@ -32,7 +32,7 @@ export function ClothesGrid() {
   const { isOwner } = useAuthContext();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("newest");
+  const [sortBy, setSortBy] = useState<string>("most-worn");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ClothingItemWithCount | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ClothingItemWithCount | null>(null);
