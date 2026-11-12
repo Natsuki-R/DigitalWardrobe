@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { ClothingItemWithCount } from "@/lib/types";
+import { fetchAll } from "@/lib/fetch-all";
+import type { ClothingItem, ClothingItemWithCount } from "@/lib/types";
 
 interface Stats {
   totalItems: number;
@@ -23,9 +24,19 @@ export function useStats() {
 
       const [{ data: clothes }, { data: outfits }, { data: outfitItems }] =
         await Promise.all([
-          supabase.from("clothes").select("*"),
-          supabase.from("outfits").select("*"),
-          supabase.from("outfit_items").select("clothes_id"),
+          fetchAll<ClothingItem>((from, to) =>
+            supabase.from("clothes").select("*").order("id").range(from, to)
+          ),
+          fetchAll<{ id: string }>((from, to) =>
+            supabase.from("outfits").select("id").order("id").range(from, to)
+          ),
+          fetchAll<{ clothes_id: string }>((from, to) =>
+            supabase
+              .from("outfit_items")
+              .select("clothes_id")
+              .order("id")
+              .range(from, to)
+          ),
         ]);
 
       if (!clothes) {

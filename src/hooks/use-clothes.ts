@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { fetchAll } from "@/lib/fetch-all";
 import { uploadClothesImage, deleteClothesImage } from "@/lib/storage";
 import type {
   ClothingItem,
@@ -17,20 +18,29 @@ export function useClothes() {
     setLoading(true);
 
     // Fetch clothes with wear count
-    const { data: clothesData } = await supabase
-      .from("clothes")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data: clothesData } = await fetchAll<ClothingItem>((from, to) =>
+      supabase
+        .from("clothes")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to)
+    );
 
     if (!clothesData) {
       setLoading(false);
       return;
     }
 
-    // Get wear counts
-    const { data: countData } = await supabase
-      .from("outfit_items")
-      .select("clothes_id");
+    // Get wear counts — one row per item per day, so this passes 1,000 quickly
+    const { data: countData } = await fetchAll<{ clothes_id: string }>(
+      (from, to) =>
+        supabase
+          .from("outfit_items")
+          .select("clothes_id")
+          .order("id")
+          .range(from, to)
+    );
 
     const countMap: Record<string, number> = {};
     countData?.forEach((item) => {
