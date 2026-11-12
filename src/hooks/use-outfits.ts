@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { ClothingItem, OutfitWithItems } from "@/lib/types";
+import { fetchAll } from "@/lib/fetch-all";
+import type { ClothingItem, Outfit, OutfitWithItems } from "@/lib/types";
+
+type OutfitRow = Outfit & { outfit_items: { clothes_id: string }[] | null };
 
 export function useOutfits() {
   const [outfits, setOutfits] = useState<OutfitWithItems[]>([]);
@@ -11,36 +14,38 @@ export function useOutfits() {
   const fetchOutfits = useCallback(async () => {
     setLoading(true);
 
-    const { data: outfitData } = await supabase
-      .from("outfits")
-      .select("*")
-      .order("date", { ascending: false });
+    // Each outfit embeds its own item links, so the 1,000-row page limit
+    // counts outfits (days) rather than outfit_items rows. `date` is unique,
+    // which keeps paging stable.
+    const [{ data: outfitData }, { data: allClothes }] = await Promise.all([
+      fetchAll<OutfitRow>((from, to) =>
+        supabase
+          .from("outfits")
+          .select("*, outfit_items(clothes_id)")
+          .order("date", { ascending: false })
+          .range(from, to)
+      ),
+      fetchAll<ClothingItem>((from, to) =>
+        supabase.from("clothes").select("*").order("id").range(from, to)
+      ),
+    ]);
 
     if (!outfitData) {
       setLoading(false);
       return;
     }
 
-    // Fetch items for all outfits
-    const { data: outfitItems } = await supabase
-      .from("outfit_items")
-      .select("outfit_id, clothes_id");
-
-    const { data: allClothes } = await supabase.from("clothes").select("*");
-
     const clothesMap = new Map<string, ClothingItem>();
     allClothes?.forEach((c) => clothesMap.set(c.id, c));
 
-    const outfitsWithItems: OutfitWithItems[] = outfitData.map((outfit) => {
-      const itemIds =
-        outfitItems
-          ?.filter((oi) => oi.outfit_id === outfit.id)
-          .map((oi) => oi.clothes_id) ?? [];
-      const items = itemIds
-        .map((id) => clothesMap.get(id))
-        .filter(Boolean) as ClothingItem[];
-      return { ...outfit, items };
-    });
+    const outfitsWithItems: OutfitWithItems[] = outfitData.map(
+      ({ outfit_items, ...outfit }) => {
+        const items = (outfit_items ?? [])
+          .map((oi) => clothesMap.get(oi.clothes_id))
+          .filter(Boolean) as ClothingItem[];
+        return { ...outfit, items };
+      }
+    );
 
     setOutfits(outfitsWithItems);
     setLoading(false);
