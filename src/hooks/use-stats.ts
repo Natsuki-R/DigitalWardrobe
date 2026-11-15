@@ -75,7 +75,8 @@ export function useStats() {
         totalItems: clothes.length,
         totalOutfits,
         topWorn: sorted.filter((c) => c.wear_count > 0).slice(0, 10),
-        neverWorn: sorted.filter((c) => c.wear_count === 0),
+        // Archived items are out of rotation, so they don't count as unworn
+        neverWorn: sorted.filter((c) => c.wear_count === 0 && !c.archived),
         categoryBreakdown,
         avgItemsPerOutfit:
           totalOutfits > 0 ? Math.round((totalOutfitItems / totalOutfits) * 10) / 10 : 0,
